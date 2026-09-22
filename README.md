@@ -1,38 +1,78 @@
 # OrganUI Lungs
 
-An interactive 3D lung explorer for the web.
+A standalone, interactive lung anatomy explorer built with React, TypeScript, Three.js, React Three Fiber, Vite, and Bun.
 
-**Status:** repository initialized; the viewer has not been implemented yet.
+The first working version is implemented and locally verified. Its full-height canvas, warm neutral colors, minimal camera toolbar, and collapsible anatomy panel follow the updated [OrganUI Heart](https://github.com/organui/heart-3d) design.
 
-This standalone anatomy example will combine a focused 3D experience with clear interface controls and source code that developers can run and adapt. It is part of the same OrganUI series as [OrganUI Heart](https://github.com/organui/heart-3d) and [OrganUI Liver](https://github.com/organui/liver-3d).
+![OrganUI Lungs desktop explorer](docs/screenshots/desktop.png)
 
-## Planned first release
+## Run locally
 
-- Explore both lungs with rotation, zoom, reset, and named camera views.
-- Select, label, isolate, hide, and restore structures supported by the chosen model.
-- Navigate a searchable anatomy hierarchy linked to the 3D view.
-- Fade lung surfaces to reveal the available airway geometry.
-- Follow a short guided exploration from the whole lungs to a lobe and its supported structures.
-- Use the interface on desktop and mobile, with keyboard-operable controls and a text alternative for anatomy information.
+Use **Bun 1.4.2** and a browser with WebGL 2. From this repository:
 
-Model inspection will determine the available lobes, segments, and airway detail. Catalog entries alone do not establish that a structure has suitable geometry. Model provenance, content-review status, and limitations will be documented alongside the implementation.
+```sh
+bun install --frozen-lockfile
+bun run dev --port 5182 --strictPort
+```
 
-The initial release is an educational interface demonstration. Breathing and airflow simulation are outside its scope.
+Open [the local explorer](http://127.0.0.1:5182/). If that port is occupied, choose another; `--strictPort` prevents accidentally using a sibling app's port. The selected model and fonts are included locally. No API keys, sibling checkout, or model download is needed to run the app.
 
-## Development
+For a production build:
 
-The planned foundation is React, TypeScript, Three.js, and Bun. Application scaffolding, dependencies, and verified run commands will be added during implementation.
+```sh
+bun run build
+bun run preview --port 5183 --strictPort
+```
 
-Read the [build brief](docs/BUILD_BRIEF.md) for the scope and acceptance criteria.
+The static output is in `dist/`. Public deployment has not been performed.
 
-This repository has its own dependencies and Git history. It must run independently of the OrganUI website monorepo and other organ examples.
+## Explore
 
-## Models and attribution
+- Open **Anatomy** to search or expand lung → lobe → segment groups. Selecting a structure updates its description, breadcrumbs, and scene highlight.
+- Drag to rotate, scroll or pinch to zoom, or use the toolbar. The view menu offers anterior, posterior, left lateral, and right lateral views.
+- Use **Isolate**, **Hide**, and **Restore all** in the panel. Selecting a hidden structure makes it visible again. Reset restores the initial scene, camera, visibility, and opacity.
+- The wind icon reveals the airway tree. **Display & selection** provides a surface-opacity slider and explicit lobe, segment, or airway picking. In airway mode, scene clicks pass through faded tissue.
+- **A closer look** starts a four-stop tour through both lungs, a lobe, an isolated segment, and the airways.
+- On mobile, the anatomy panel opens below the scene. **View in 3D** returns to the selected model.
 
-No third-party anatomy assets are included yet. Each selected asset will have its source, version, license, attribution, and modifications recorded. Third-party models retain their own licenses.
+Keyboard: focus the model and use arrow keys to rotate, `+`/`−` to zoom, and `Home` to reset. All anatomy is also reachable through ordinary buttons and search. The view menu supports arrow keys, Home/End, letter navigation, and Escape. The model information dialog restores focus when closed. There is no automatic camera animation; interface transitions respect reduced-motion preferences.
 
-## License
+## Model scope
 
-Original project code is licensed under the [MIT License](LICENSE). Third-party models and other assets, when added, are governed by their documented licenses.
+The bundled **BodyParts3D / Anatomography 4.3** model contains five lobes assembled from **17 tissue segment groups**, plus the trachea and the right and left bronchial trees. Its 20 selectable leaf groups combine 119 original source elements. Parent structures are unions of these elements; they do not add overlapping shells.
 
-Part of [OrganUI](https://github.com/organui).
+This is the anatomy represented by this particular source model. No distinct medial-basal tissue surface is supplied. Left apicoposterior tissue combines two source pieces under one concept. Interior seams, simplified branches, cut ends, and imperfect local airway/tissue fit remain visible, especially with transparency. Colors are illustrative.
+
+Labels, source relationships, coordinates, and interface behavior have been inspected during development. Independent anatomical review is pending. This educational demonstration does not simulate breathing, airflow, disease, or surgical planning.
+
+See [model provenance and review notes](docs/MODEL_PROVENANCE.md), the [runtime manifest](public/models/manifest.json), and the in-app **About this model** dialog for sources, exact mappings, checksums, modifications, and limitations.
+
+## Verification and asset recovery
+
+```sh
+bun test
+bun run typecheck
+bun run verify:model
+bun run build
+```
+
+The state tests cover hierarchy partitioning, visibility recovery, reset, and picking policy. Model verification independently checks the GLB checksum, anatomy IDs, unique source-element ownership, finite coordinates, topology, and patient laterality. [Verification notes](docs/VERIFICATION.md) record browser interaction checks and remaining limitations.
+
+The app shows loading progress and retry controls for unavailable models, unavailable WebGL, and interrupted graphics contexts. Anatomy text remains accessible when rendering fails. If the bundled GLB is missing or altered, restore it from the repository or rebuild it:
+
+```sh
+bun run prepare:model
+bun run verify:model
+```
+
+Preparation downloads checksum-pinned source OBJ files into ignored `.asset-cache/objs/`; this optional step needs network access. It validates original file headers and official anatomy mappings before applying a shared coordinate transform and conservative simplification. A complete fresh source download is approximately 14.7 MB.
+
+## License and credits
+
+Application code: [MIT](LICENSE).
+
+Model and rendered model images: **BodyParts3D / Anatomography, © The Database Center for Life Science (DBCLS)**, adapted by OrganUI, under [CC BY-SA 2.1 Japan](https://creativecommons.org/licenses/by-sa/2.1/jp/deed.en). This follows the original 4.3 download service's license notice. The separate archive's CC BY 4.0 notice is not applied to these assets. See [model attribution](public/models/LICENSE.txt).
+
+Manrope and DM Sans are self-hosted under SIL OFL 1.1; Lucide icons use ISC. Notices are in [public/licenses](public/licenses/).
+
+Part of [OrganUI](https://github.com/organui), alongside [Heart](https://github.com/organui/heart-3d) and [Liver](https://github.com/organui/liver-3d).

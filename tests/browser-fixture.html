@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lungs browser failure fixture</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      const scenario = new URLSearchParams(location.search).get("scenario");
+      const originalFetch = window.fetch.bind(window);
+      let count = 0;
+      if (scenario === "asset")
+        window.fetch = (url, options) =>
+          String(url).includes("models/lungs.glb") && count++ === 0
+            ? Promise.resolve(
+                new Response("Fixture missing asset", { status: 404 }),
+              )
+            : originalFetch(url, options);
+      if (scenario === "slow")
+        window.fetch = async (url, options) => {
+          if (String(url).includes("models/lungs.glb"))
+            await new Promise((r) => setTimeout(r, 3500));
+          return originalFetch(url, options);
+        };
+      if (scenario === "webgl") {
+        const originalContext = HTMLCanvasElement.prototype.getContext;
+        HTMLCanvasElement.prototype.getContext = function (type, ...args) {
+          return String(type).includes("webgl")
+            ? null
+            : originalContext.call(this, type, ...args);
+        };
+        const b = document.createElement("button");
+        b.textContent = "Restore graphics support";
+        b.style =
+          "position:fixed;top:0;right:0;z-index:100;background:white;padding:12px;border:1px solid black";
+        b.onclick = () => {
+          HTMLCanvasElement.prototype.getContext = originalContext;
+          b.remove();
+        };
+        document.body.appendChild(b);
+      }
+      if (scenario === "context") {
+        const b = document.createElement("button");
+        b.textContent = "Simulate graphics context loss";
+        b.style =
+          "position:fixed;top:0;right:0;z-index:100;background:white;padding:12px;border:1px solid black";
+        b.onclick = () =>
+          document
+            .querySelector("canvas")
+            ?.dispatchEvent(
+              new Event("webglcontextlost", { cancelable: true }),
+            );
+        document.body.appendChild(b);
+      }
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

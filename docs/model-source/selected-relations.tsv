@@ -1,0 +1,38 @@
+parent id	parent name	child id	child name
+FMA7309	right lung	FMA7333	upper lobe of right lung
+FMA7309	right lung	FMA7337	lower lobe of right lung
+FMA7309	right lung	FMA7383	middle lobe of lung
+FMA7309	right lung	FMA67994	intrapulmonary part of right pulmonary artery
+FMA7309	right lung	FMA68002	intrapulmonary part of right superior pulmonary vein
+FMA7309	right lung	FMA68003	intrapulmonary part of right inferior pulmonary vein
+FMA7310	left lung	FMA7370	upper lobe of left lung
+FMA7310	left lung	FMA7371	lower lobe of left lung
+FMA7310	left lung	FMA67995	intrapulmonary part of left pulmonary artery
+FMA7310	left lung	FMA68004	intrapulmonary part of left superior pulmonary vein
+FMA7310	left lung	FMA68005	intrapulmonary part of left inferior pulmonary vein
+FMA7333	upper lobe of right lung	FMA7338	right apical bronchopulmonary segment
+FMA7333	upper lobe of right lung	FMA7339	right posterior bronchopulmonary segment
+FMA7333	upper lobe of right lung	FMA7359	right anterior bronchopulmonary segment
+FMA7333	upper lobe of right lung	FMA8655	right upper lobar vein
+FMA7333	upper lobe of right lung	FMA31744	upper lobe part of right bronchial tree
+FMA7337	lower lobe of right lung	FMA7362	right posterior basal bronchopulmonary segment
+FMA7337	lower lobe of right lung	FMA7363	right lateral basal bronchopulmonary segment
+FMA7337	lower lobe of right lung	FMA7364	right anterior basal bronchopulmonary segment
+FMA7337	lower lobe of right lung	FMA7365	right medial basal bronchopulmonary segment
+FMA7337	lower lobe of right lung	FMA7366	right superior bronchopulmonary segment
+FMA7370	upper lobe of left lung	FMA7372	apicoposterior bronchopulmonary segment
+FMA7370	upper lobe of left lung	FMA7373	left anterior bronchopulmonary segment
+FMA7370	upper lobe of left lung	FMA7374	superior lingular bronchopulmonary segment
+FMA7370	upper lobe of left lung	FMA7375	inferior lingular bronchopulmonary segment
+FMA7370	upper lobe of left lung	FMA7385	left apical bronchopulmonary segment
+FMA7370	upper lobe of left lung	FMA7386	left posterior bronchopulmonary segment
+FMA7370	upper lobe of left lung	FMA31746	upper lobe part of left bronchial tree
+FMA7370	upper lobe of left lung	FMA68198	left upper lobar artery
+FMA7371	lower lobe of left lung	FMA7376	left superior bronchopulmonary segment
+FMA7371	lower lobe of left lung	FMA7377	left medial basal bronchopulmonary segment
+FMA7371	lower lobe of left lung	FMA7378	left anterior basal bronchopulmonary segment
+FMA7371	lower lobe of left lung	FMA7379	left lateral basal bronchopulmonary segment
+FMA7371	lower lobe of left lung	FMA7380	left posterior basal bronchopulmonary segment
+FMA7383	middle lobe of lung	FMA7360	medial bronchopulmonary segment
+FMA7383	middle lobe of lung	FMA7361	lateral bronchopulmonary segment
+FMA7383	middle lobe of lung	FMA8656	middle lobar vein
