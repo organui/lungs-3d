@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { initialState, reducer, pickTarget } from "../src/state";
+import { emphasis, initialState, reducer, pickTarget } from "../src/state";
 import { leafIds, leaves, nodes } from "../src/anatomy";
 describe("anatomical selection and visibility", () => {
   test("five lobes partition 17 tissue groups exactly once", () => {
@@ -53,5 +53,16 @@ describe("anatomical selection and visibility", () => {
     s = reducer(s, { type: "restore" });
     expect(s.hidden).toEqual([]);
     expect(s.selected).toBe("FMA7333");
+  });
+  test("a narrow selection stands out and the rest recedes", () => {
+    expect(emphasis("FMA7338", initialState)).toBe("normal");
+    let s = reducer(initialState, { type: "select", id: "FMA7333" });
+    for (const id of leafIds("FMA7333"))
+      expect(emphasis(id, s)).toBe("selected");
+    const others = leaves.filter((n) => !leafIds("FMA7333").includes(n.id));
+    expect(others.length).toBeGreaterThan(0);
+    for (const n of others) expect(emphasis(n.id, s)).toBe("muted");
+    s = reducer(s, { type: "select", id: "airways" });
+    expect(leaves.every((n) => emphasis(n.id, s) === "normal")).toBe(true);
   });
 });

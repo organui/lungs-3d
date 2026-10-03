@@ -3,6 +3,7 @@ import { Canvas, useThree, type ThreeEvent } from "@react-three/fiber";
 import {
   Box3,
   BufferGeometry,
+  Color,
   FrontSide,
   Mesh,
   PerspectiveCamera,
@@ -10,8 +11,8 @@ import {
 } from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { byId, leafIds } from "./anatomy";
-import { pickTarget, type ViewerState } from "./state";
+import { byId } from "./anatomy";
+import { emphasis, pickTarget, type ViewerState } from "./state";
 export type CameraCommand = {
   key: number;
   direction: "left" | "right" | "up" | "down";
@@ -113,10 +114,11 @@ function CameraRig({
     const center = bounds.getCenter(new Vector3());
     const extent = bounds.getSize(new Vector3());
     const aspect = size.width / size.height;
+    // Narrow stages need more side room than height room so the lateral
+    // lung edges do not touch the screen edges on phones.
     const distance =
-      (Math.max(extent.y, extent.x / aspect) /
-        (2 * Math.tan((32 * Math.PI) / 360))) *
-      1.18;
+      Math.max(extent.y * 1.16, (extent.x * 1.34) / aspect) /
+      (2 * Math.tan((32 * Math.PI) / 360));
     const directions = {
       Anterior: [0, 0, 1],
       Posterior: [0, 0, -1],
@@ -186,6 +188,16 @@ function CameraRig({
   }, [command, camera, invalidate]);
   return null;
 }
+const stageTone = new Color("#e4e3dc");
+const muted = new Map<string, string>();
+function mutedColor(color: string) {
+  let value = muted.get(color);
+  if (!value) {
+    value = "#" + new Color(color).lerp(stageTone, 0.55).getHexString();
+    muted.set(color, value);
+  }
+  return value;
+}
 function Model({
   parts,
   state,
@@ -195,7 +207,6 @@ function Model({
   state: ViewerState;
   onSelect: (id: string) => void;
 }) {
-  const selected = new Set(leafIds(state.selected));
   const hidden = new Set(state.hidden);
   return (
     <group>
@@ -205,8 +216,8 @@ function Model({
         const opacity = surface ? state.opacity : 1;
         if (hidden.has(id) || opacity === 0) return null;
         const target = pickTarget(id, state.pick);
-        const active =
-          selected.has(id) && !["lungs", "airways"].includes(state.selected);
+        const emphasized = emphasis(id, state);
+        const color = emphasized === "muted" ? mutedColor(n.color) : n.color;
         const select = (event: ThreeEvent<MouseEvent>) => {
           if (!target) return;
           event.stopPropagation();
@@ -221,15 +232,15 @@ function Model({
           >
             <meshStandardMaterial
               key={opacity < 1 ? "revealed" : "solid"}
-              color={active ? "#f0ce85" : n.color}
+              color={color}
               roughness={surface ? 0.57 : 0.44}
               metalness={0}
               side={FrontSide}
               opacity={opacity}
               transparent={opacity < 1}
               depthWrite={opacity === 1}
-              emissive={active ? "#6b421d" : "#000000"}
-              emissiveIntensity={active ? 0.13 : 0}
+              emissive={emphasized === "selected" ? n.color : "#000000"}
+              emissiveIntensity={emphasized === "selected" ? 0.22 : 0}
             />
           </mesh>
         );

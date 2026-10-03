@@ -416,7 +416,7 @@ export default function App() {
               </div>
             </div>
             <p className="canvas-hint">
-              Drag to rotate · Scroll to zoom ·{" "}
+              Drag to rotate · Scroll or pinch to zoom ·{" "}
               {state.opacity < 1
                 ? `Click ${state.pick}`
                 : freeOrbit

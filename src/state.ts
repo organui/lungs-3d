@@ -96,3 +96,10 @@ export function pickTarget(id: string, mode: PickMode): string | undefined {
   if (n.kind !== "segment") return;
   return mode === "lobes" ? n.parent : id;
 }
+export type Emphasis = "normal" | "selected" | "muted";
+// Whole-organ and whole-airway selections leave every structure at its own
+// color; any narrower selection lifts its parts and recedes the rest.
+export function emphasis(id: string, state: ViewerState): Emphasis {
+  if (["lungs", "airways"].includes(state.selected)) return "normal";
+  return leafIds(state.selected).includes(id) ? "selected" : "muted";
+}

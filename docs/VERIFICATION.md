@@ -34,6 +34,8 @@ The final interface follows the updated Heart example: full-height warm neutral 
 
 Desktop layouts were inspected at 1280×720 and 1280×800. The final mobile screenshot was captured at a verified 390×844 CSS viewport with a 390-pixel document width and no horizontal overflow. See [desktop screenshot](screenshots/desktop.png) and [mobile screenshot](screenshots/mobile.png).
 
+A polish pass on 3 October 2026 re-checked the explorer in headless Chromium (SwiftShader WebGL) at 1440×900, 390×844 and 360×740 with no horizontal overflow. It changed selection to lift the chosen structure and recede the rest, widened side framing on narrow screens, kept the anatomy tree directly above the detail card with its own scroll area, raised the smallest text sizes, and changed the hint to "Scroll or pinch to zoom" as in the other organ explorers. `bun test` (6 tests), typecheck and build passed. The screenshots above were replaced with 1440×900 and 390×844 captures; before/after captures are in [screenshots/polish](screenshots/polish).
+
 Failure scenarios are reproducible in development at `/tests/browser-fixture.html?scenario=asset`, `webgl`, `context`, or `slow`. They run the actual app with narrowly scoped browser faults. The context fixture includes its own simulation button; the WebGL fixture includes a restoration button. These fixtures are not production build entry points.
 
 ## Remaining limits
