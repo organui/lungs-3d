@@ -371,21 +371,21 @@ export default function App() {
                 <div className="camera-actions">
                   <button
                     className="icon-button"
-                    aria-label="Zoom out"
-                    title="Zoom out"
-                    disabled={state.zoom <= 0.65}
-                    onClick={() => dispatch({ type: "zoom", value: 0.85 })}
-                  >
-                    <Minus size={17} />
-                  </button>
-                  <button
-                    className="icon-button"
                     aria-label="Zoom in"
                     title="Zoom in"
                     disabled={state.zoom >= 2.4}
                     onClick={() => dispatch({ type: "zoom", value: 1.18 })}
                   >
                     <Plus size={17} />
+                  </button>
+                  <button
+                    className="icon-button"
+                    aria-label="Zoom out"
+                    title="Zoom out"
+                    disabled={state.zoom <= 0.65}
+                    onClick={() => dispatch({ type: "zoom", value: 0.85 })}
+                  >
+                    <Minus size={17} />
                   </button>
                   <button
                     className="icon-button"

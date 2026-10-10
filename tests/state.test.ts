@@ -61,7 +61,7 @@ describe("anatomical selection and visibility", () => {
       expect(emphasis(id, s)).toBe("selected");
     const others = leaves.filter((n) => !leafIds("FMA7333").includes(n.id));
     expect(others.length).toBeGreaterThan(0);
-    for (const n of others) expect(emphasis(n.id, s)).toBe("muted");
+    for (const n of others) expect(emphasis(n.id, s)).toBe("ghosted");
     s = reducer(s, { type: "select", id: "airways" });
     expect(leaves.every((n) => emphasis(n.id, s) === "normal")).toBe(true);
   });
