@@ -207,7 +207,7 @@ button svg {
   overflow: hidden;
 }
 .eyebrow {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 650;
   letter-spacing: 1.3px;
   color: var(--muted);
@@ -242,7 +242,7 @@ button svg {
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
   pointer-events: none;
   opacity: 0.7;
@@ -259,12 +259,12 @@ button svg {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
 }
 .scene-status button {
   text-decoration: underline;
-  font-size: 10px;
+  font-size: 11px;
   padding: 4px;
 }
 .pending {
@@ -369,7 +369,7 @@ button svg {
   background: var(--surface);
   border-radius: 999px;
   padding: 4px 7px 4px 10px;
-  font-size: 11px;
+  font-size: 12px;
   max-width: calc(100% - 56px);
 }
 .selection-chip > button {
@@ -488,7 +488,7 @@ button svg {
 .detail-card .small-note {
   display: block;
   margin-top: 13px;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.7;
   color: var(--muted);
 }
@@ -496,12 +496,12 @@ button svg {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 8px;
+  font-size: 10px;
   color: var(--muted);
   margin-bottom: 8px;
 }
 .detail-eyebrow .eyebrow {
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: 1px;
 }
 .detail-actions {
@@ -535,13 +535,13 @@ button svg {
   text-decoration: underline;
 }
 .model-note {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
   line-height: 1.7;
 }
 .model-note summary {
   cursor: pointer;
-  font-size: 9px;
+  font-size: 11px;
   user-select: none;
   padding: 2px 0;
 }
@@ -570,7 +570,7 @@ button svg {
   color: var(--muted);
 }
 .tour-card .eyebrow {
-  font-size: 7px;
+  font-size: 9px;
   letter-spacing: 1.05px;
   color: var(--muted);
 }
@@ -579,7 +579,7 @@ button svg {
   font-weight: 550;
 }
 .tour-card p {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
   margin-top: 5px;
   line-height: 1.8;
@@ -642,7 +642,7 @@ button svg {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 8px;
+  font-size: 10px;
   color: var(--muted);
   line-height: 1.7;
 }
@@ -657,7 +657,7 @@ button svg {
   align-items: center;
   justify-content: space-between;
   padding: 10px 28px;
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
   gap: 15px;
   background: var(--surface);
@@ -702,8 +702,8 @@ button svg {
   flex-shrink: 0;
 }
 .structure-list {
-  flex: 1 1 auto;
-  min-height: 182px;
+  flex: 0 1 auto;
+  min-height: 120px;
   overflow-y: auto;
   padding-right: 3px;
 }
@@ -811,12 +811,12 @@ button svg {
 .search-results small {
   display: block;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
   margin-top: 3px;
 }
 .search-count {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
   padding: 0 10px 8px;
 }
 .no-results {
@@ -830,7 +830,7 @@ button svg {
   align-items: center;
   flex-wrap: wrap;
   gap: 2px;
-  font-size: 9px;
+  font-size: 11px;
   color: var(--muted);
   margin-bottom: 9px;
 }
@@ -894,7 +894,7 @@ button svg {
 .range-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
 }
 .reveal fieldset {
@@ -928,7 +928,7 @@ button svg {
   color: white;
 }
 .pick-help {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
   line-height: 1.7;
   margin-top: 9px;
@@ -1081,19 +1081,19 @@ button svg {
     inset: 76px 0;
   }
   .canvas-hint {
-    font-size: 9px;
+    font-size: 11px;
     bottom: 0;
   }
   .scene-status {
     top: 16px;
     left: 20px;
-    font-size: 9px;
+    font-size: 11px;
   }
   .selection-chip {
     top: 44px;
     right: 20px;
     max-width: calc(100% - 40px);
-    font-size: 10px;
+    font-size: 12px;
   }
   .stage-bottom {
     bottom: 20px;
@@ -1202,7 +1202,7 @@ button svg {
     font-size: 12px;
   }
   .review-note {
-    font-size: 9px;
+    font-size: 11px;
   }
   .mobile-return {
     display: flex;
@@ -1213,7 +1213,7 @@ button svg {
     justify-content: center;
     min-height: 48px;
     padding: 12px 20px;
-    font-size: 9px;
+    font-size: 11px;
   }
   .site-footer > span:first-child {
     display: none;

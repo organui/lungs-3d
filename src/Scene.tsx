@@ -1,8 +1,8 @@
 import { Component, useEffect, useRef, useState, type ReactNode } from "react";
 import { Canvas, useThree, type ThreeEvent } from "@react-three/fiber";
 import {
-  Box3,
   BufferGeometry,
+  Color,
   FrontSide,
   Mesh,
   PerspectiveCamera,
@@ -10,8 +10,9 @@ import {
 } from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { byId, leafIds } from "./anatomy";
-import { pickTarget, type ViewerState } from "./state";
+import { byId } from "./anatomy";
+import { fitDistance, framingCenter, surfacePoints } from "./framing";
+import { emphasis, pickTarget, type ViewerState } from "./state";
 export type CameraCommand = {
   key: number;
   direction: "left" | "right" | "up" | "down";
@@ -67,12 +68,12 @@ function CameraRig({
   state,
   command,
   onOrbit,
-  bounds,
+  points,
 }: {
   state: ViewerState;
   command: CameraCommand;
   onOrbit: () => void;
-  bounds: Box3;
+  points: Vector3[];
 }) {
   const { camera, gl, invalidate, size } = useThree();
   const controls = useRef<OrbitControls | null>(null);
@@ -110,13 +111,8 @@ function CameraRig({
     };
   }, [camera, gl, invalidate]);
   useEffect(() => {
-    const center = bounds.getCenter(new Vector3());
-    const extent = bounds.getSize(new Vector3());
+    const center = framingCenter(points);
     const aspect = size.width / size.height;
-    const distance =
-      (Math.max(extent.y, extent.x / aspect) /
-        (2 * Math.tan((32 * Math.PI) / 360))) *
-      1.18;
     const directions = {
       Anterior: [0, 0, 1],
       Posterior: [0, 0, -1],
@@ -132,6 +128,13 @@ function CameraRig({
     const direction = resized
       ? offset.clone().normalize()
       : new Vector3(...directions[state.view]);
+    const distance = fitDistance(
+      points,
+      center,
+      resized ? new Vector3(...directions[state.view]) : direction,
+      (camera as PerspectiveCamera).fov,
+      aspect,
+    );
     const zoomFactor = resized
       ? offset.length() / previous.distance
       : 1 / previousZoom.current;
@@ -147,7 +150,7 @@ function CameraRig({
   }, [
     camera,
     invalidate,
-    bounds,
+    points,
     size.width,
     size.height,
     state.cameraKey,
@@ -186,6 +189,16 @@ function CameraRig({
   }, [command, camera, invalidate]);
   return null;
 }
+const stageTone = new Color("#e4e3dc");
+const ghosts = new Map<string, string>();
+function ghostColor(color: string) {
+  let value = ghosts.get(color);
+  if (!value) {
+    value = "#" + new Color(color).lerp(stageTone, 0.5).getHexString();
+    ghosts.set(color, value);
+  }
+  return value;
+}
 function Model({
   parts,
   state,
@@ -195,18 +208,22 @@ function Model({
   state: ViewerState;
   onSelect: (id: string) => void;
 }) {
-  const selected = new Set(leafIds(state.selected));
   const hidden = new Set(state.hidden);
   return (
     <group>
       {parts.map(({ id, geometry }) => {
         const n = byId[id];
         const surface = n.kind === "segment";
-        const opacity = surface ? state.opacity : 1;
-        if (hidden.has(id) || opacity === 0) return null;
+        const surfaceOpacity = surface ? state.opacity : 1;
+        if (hidden.has(id) || surfaceOpacity === 0) return null;
         const target = pickTarget(id, state.pick);
-        const active =
-          selected.has(id) && !["lungs", "airways"].includes(state.selected);
+        const emphasized = emphasis(id, state);
+        // A selection ghosts everything else so it reads from any view.
+        const ghosted = emphasized === "ghosted";
+        const opacity = ghosted
+          ? Math.min(surfaceOpacity, 0.22)
+          : surfaceOpacity;
+        const color = ghosted ? ghostColor(n.color) : n.color;
         const select = (event: ThreeEvent<MouseEvent>) => {
           if (!target) return;
           event.stopPropagation();
@@ -221,15 +238,15 @@ function Model({
           >
             <meshStandardMaterial
               key={opacity < 1 ? "revealed" : "solid"}
-              color={active ? "#f0ce85" : n.color}
+              color={color}
               roughness={surface ? 0.57 : 0.44}
               metalness={0}
               side={FrontSide}
               opacity={opacity}
               transparent={opacity < 1}
               depthWrite={opacity === 1}
-              emissive={active ? "#6b421d" : "#000000"}
-              emissiveIntensity={active ? 0.13 : 0}
+              emissive={emphasized === "selected" ? n.color : "#000000"}
+              emissiveIntensity={emphasized === "selected" ? 0.35 : 0}
             />
           </mesh>
         );
@@ -251,7 +268,7 @@ function ContextGuard({ onLost }: { onLost: () => void }) {
 }
 export default function Scene(props: Props) {
   const [parts, setParts] = useState<Part[]>([]);
-  const [bounds, setBounds] = useState<Box3>();
+  const [points, setPoints] = useState<Vector3[]>([]);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -264,7 +281,7 @@ export default function Scene(props: Props) {
     setError(false);
     setProgress(0);
     setParts([]);
-    setBounds(undefined);
+    setPoints([]);
     setContextLost(false);
     try {
       const probe = document.createElement("canvas").getContext("webgl2");
@@ -322,13 +339,9 @@ export default function Scene(props: Props) {
           geometries.forEach((g) => g.dispose());
           return;
         }
-        const box = new Box3();
-        for (const p of loaded) {
-          p.geometry.computeBoundingBox();
-          box.union(p.geometry.boundingBox!);
-        }
         setParts(loaded);
-        setBounds(box);
+        // Parts render their raw geometry, so sample it untransformed.
+        setPoints(loaded.flatMap((p) => surfacePoints(new Mesh(p.geometry))));
         setProgress(100);
       } catch (e) {
         if (!cancelled) {
@@ -402,9 +415,9 @@ export default function Scene(props: Props) {
         <hemisphereLight args={["#fff7e9", "#70857e", 1.5]} />
         <directionalLight position={[-5, 8, 8]} intensity={2.7} />
         <directionalLight position={[5, 2, -6]} intensity={2} />
-        {bounds && (
+        {points.length > 0 && (
           <>
-            <CameraRig {...props} bounds={bounds} />
+            <CameraRig {...props} points={points} />
             <Model
               parts={parts}
               state={props.state}
