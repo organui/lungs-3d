@@ -5,7 +5,6 @@ import {
   useReducer,
   useRef,
   useState,
-  type CSSProperties,
 } from "react";
 import {
   Activity,
@@ -18,26 +17,24 @@ import {
   ChevronRight,
   EyeOff,
   Info,
-  Layers3,
   Maximize2,
   Minus,
   PanelRightClose,
   PanelRightOpen,
   Plus,
   RotateCcw,
-  Search,
   Wind,
   X,
 } from "lucide-react";
+import { AnatomyTree } from "@/components/ui/anatomy-tree";
+import { ancestors, byId, leafIds, leaves } from "./anatomy";
 import {
-  ancestors,
-  byId,
-  children,
-  leafIds,
-  leaves,
-  nodes,
-  type AnatomyNode,
-} from "./anatomy";
+  anatomyTree,
+  defaultExpandedIds,
+  expansionFor,
+  hiddenFromVisibility,
+  visibilityFromHidden,
+} from "./anatomy-adapter";
 import { initialState, reducer, type PickMode } from "./state";
 import type { CameraCommand } from "./Scene";
 import ViewMenu from "./ViewMenu";
@@ -71,8 +68,10 @@ const tour = [
 ];
 export default function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [query, setQuery] = useState("");
-  const [expanded, setExpanded] = useState<string[]>([]);
+  // The registry tree owns search and disclosure. A new key remounts it:
+  // reset clears both, and a selection without a visible row reopens its
+  // ancestors so list and scene stay synchronized.
+  const [tree, setTree] = useState({ key: 0, expanded: defaultExpandedIds });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [tourStep, setTourStep] = useState<number | null>(null);
   const [about, setAbout] = useState(false);
@@ -86,12 +85,22 @@ export default function App() {
   const stage = useRef<HTMLDivElement>(null);
   const panelToggle = useRef<HTMLButtonElement>(null);
   const aboutTrigger = useRef<HTMLElement | null>(null);
+  const treeWrap = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     if (!sidebarOpen) return;
     panel.current?.focus({ preventScroll: true });
     if (window.matchMedia("(max-width: 760px)").matches)
       panel.current?.scrollIntoView({ block: "start" });
   }, [sidebarOpen]);
+  useLayoutEffect(() => {
+    const rows = treeWrap.current;
+    if (!rows || rows.querySelector('[role="treeitem"][aria-selected="true"]'))
+      return;
+    setTree((t) => ({
+      key: t.key + 1,
+      expanded: [...new Set([...t.expanded, ...expansionFor(state.selected)])],
+    }));
+  }, [state.selected, tree.key]);
   const selected = byId[state.selected];
   const visibleCount = leaves.filter(
     (n) => !state.hidden.includes(n.id),
@@ -124,20 +133,15 @@ export default function App() {
   }
   function select(id: string) {
     dispatch({ type: "select", id });
-    setExpanded((v) => [
-      ...new Set([...v, ...ancestors(id).map((n) => n.id), id]),
-    ]);
   }
   function reset() {
     dispatch({ type: "reset" });
-    setQuery("");
     setTourStep(null);
     setFreeOrbit(false);
-    setExpanded([]);
+    setTree((t) => ({ key: t.key + 1, expanded: defaultExpandedIds }));
   }
   function step(index: number) {
     setTourStep(index);
-    setQuery("");
     const stop = tour[index];
     dispatch({ type: "reset" });
     select(stop.id);
@@ -155,62 +159,6 @@ export default function App() {
       dispatch({ type: "opacity", value: 0.12 });
     }
   }
-  function row(n: AnatomyNode, depth = 0) {
-    const kids = children(n.id);
-    const open = expanded.includes(n.id);
-    const hidden = leafIds(n.id).every((id) => state.hidden.includes(id));
-    return (
-      <li key={n.id}>
-        <div
-          className={`anatomy-row ${state.selected === n.id ? "selected" : ""} ${hidden ? "is-hidden" : ""}`}
-          style={
-            { "--depth": depth, "--structure-color": n.color } as CSSProperties
-          }
-        >
-          {kids.length ? (
-            <button
-              className="expand"
-              aria-label={`${open ? "Collapse" : "Expand"} ${n.name}`}
-              aria-expanded={open}
-              onClick={() =>
-                setExpanded((v) =>
-                  v.includes(n.id) ? v.filter((x) => x !== n.id) : [...v, n.id],
-                )
-              }
-            >
-              {open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-            </button>
-          ) : (
-            <span className="tree-indent" />
-          )}
-          <button
-            className="anatomy-select"
-            aria-label={`Select ${n.name}`}
-            aria-pressed={state.selected === n.id}
-            onClick={() => select(n.id)}
-          >
-            <span className="color-dot" />
-            <span>{n.short}</span>
-            {hidden ? (
-              <EyeOff size={12} />
-            ) : kids.length ? (
-              <span className="count-tag">{kids.length}</span>
-            ) : null}
-          </button>
-        </div>
-        {open && kids.length > 0 && (
-          <ul>{kids.map((c) => row(c, depth + 1))}</ul>
-        )}
-      </li>
-    );
-  }
-  const matches = query.trim()
-    ? nodes.filter((n) =>
-        `${n.name} ${n.id} ${n.tissue ?? ""}`
-          .toLowerCase()
-          .includes(query.toLowerCase().trim()),
-      )
-    : [];
   return (
     <>
       <div className="app-shell" inert={about || undefined}>
@@ -454,74 +402,23 @@ export default function App() {
                 <X size={17} />
               </button>
             </div>
-            <label className="search-wrap">
-              <Search size={15} />
-              <input
-                type="search"
-                aria-label="Search anatomy"
-                placeholder="Search anatomy…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
+            <div className="tree-scroll" ref={treeWrap}>
+              <AnatomyTree
+                key={tree.key}
+                data={anatomyTree}
+                selectedId={state.selected}
+                onSelectionChange={select}
+                visibility={visibilityFromHidden(state.hidden)}
+                onVisibilityChange={(next) =>
+                  dispatch({
+                    type: "setHidden",
+                    hidden: hiddenFromVisibility(next),
+                  })
+                }
+                defaultExpandedIds={tree.expanded}
+                label="Lung anatomy"
+                className="registry-tree"
               />
-              {query && (
-                <button aria-label="Clear search" onClick={() => setQuery("")}>
-                  <X size={14} />
-                </button>
-              )}
-            </label>
-            <div className="structure-list">
-              {query.trim() ? (
-                <>
-                  <p className="search-count" role="status">
-                    {matches.length} matching structures
-                  </p>
-                  <ul className="search-results">
-                    {matches.map((n) => (
-                      <li key={n.id}>
-                        <button
-                          aria-label={`Select ${n.name}`}
-                          aria-pressed={state.selected === n.id}
-                          onClick={() => select(n.id)}
-                        >
-                          <span
-                            className="color-dot"
-                            style={{ background: n.color }}
-                          />
-                          <span>
-                            {n.name}
-                            <small>
-                              {n.kind} · {n.id}
-                            </small>
-                          </span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                  {matches.length === 0 && (
-                    <p className="no-results">
-                      No structures found. Try “upper”, “basal”, or “trachea”.
-                    </p>
-                  )}
-                </>
-              ) : (
-                <>
-                  <button
-                    className="all-lungs"
-                    aria-pressed={state.selected === "lungs"}
-                    onClick={() => select("lungs")}
-                  >
-                    <Layers3 size={14} />
-                    Both lungs<span className="count-tag">5 lobes</span>
-                  </button>
-                  <ul className="anatomy-tree">
-                    {row(byId.FMA7309)}
-                    {row(byId.FMA7310)}
-                  </ul>
-                  <ul className="anatomy-tree airway-tree">
-                    {row(byId.airways)}
-                  </ul>
-                </>
-              )}
             </div>
             <section className="detail-card" aria-label="Selected structure">
               <div aria-live="polite">

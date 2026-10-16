@@ -24,6 +24,7 @@ export type Action =
   | { type: "hide" }
   | { type: "isolate" }
   | { type: "restore" }
+  | { type: "setHidden"; hidden: string[] }
   | { type: "reset" }
   | { type: "opacity"; value: number }
   | { type: "pick"; value: PickMode }
@@ -60,6 +61,11 @@ export function reducer(s: ViewerState, a: Action): ViewerState {
       };
     case "restore":
       return { ...s, hidden: [] };
+    case "setHidden":
+      return {
+        ...s,
+        hidden: leaves.map((n) => n.id).filter((id) => a.hidden.includes(id)),
+      };
     case "reset":
       return { ...initialState, cameraKey: s.cameraKey + 1 };
     case "opacity":

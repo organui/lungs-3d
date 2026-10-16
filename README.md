@@ -28,14 +28,20 @@ The static output is in `dist/`. Public deployment has not been performed.
 
 ## Explore
 
-- Open **Anatomy** to search or expand lung → lobe → segment groups. Selecting a structure updates its description, breadcrumbs, and scene highlight.
+- Open **Anatomy** to search or expand the anatomy tree: both lungs → lung → lobe → segment group, and the airway tree (trachea, right and left bronchial trees). Selecting any row, including a lung or lobe, updates its description, breadcrumbs, and scene highlight. Each row's **Visible / Hidden / Mixed** button hides or shows that structure's scene parts.
 - Drag to rotate, scroll or pinch to zoom, or use the toolbar. The view menu offers anterior, posterior, left lateral, and right lateral views.
 - Use **Isolate**, **Hide**, and **Restore all** in the panel. Selecting a hidden structure makes it visible again. Reset restores the initial scene, camera, visibility, and opacity.
 - The wind icon reveals the airway tree. **Display & selection** provides a surface-opacity slider and explicit lobe, segment, or airway picking. In airway mode, scene clicks pass through faded tissue.
 - **A closer look** starts a four-stop tour through both lungs, a lobe, an isolated segment, and the airways.
 - On mobile, the anatomy panel opens below the scene. **View in 3D** returns to the selected model.
 
-Keyboard: focus the model and use arrow keys to rotate, `+`/`−` to zoom, and `Home` to reset. All anatomy is also reachable through ordinary buttons and search. The view menu supports arrow keys, Home/End, letter navigation, and Escape. The model information dialog restores focus when closed. There is no automatic camera animation; interface transitions respect reduced-motion preferences.
+Keyboard: focus the model and use arrow keys to rotate, `+`/`−` to zoom, and `Home` to reset. In the anatomy tree, arrows move and expand, Enter selects, and Space toggles visibility. All anatomy is also reachable through ordinary buttons and search. The view menu supports arrow keys, Home/End, letter navigation, and Escape. The model information dialog restores focus when closed. There is no automatic camera animation; interface transitions respect reduced-motion preferences.
+
+![Anatomy tree synchronized with a right upper lobe selection](docs/screenshots/anatomy.png)
+
+### Anatomy tree
+
+The panel's tree is the OrganUI registry component `anatomy-tree`, installed with the shadcn CLI into `src/components/ui/anatomy-tree.tsx` and kept unmodified. Lung-specific mapping lives in `src/anatomy-adapter.ts`. See [registry integration](docs/REGISTRY_INTEGRATION.md) for the install command, checksums, and decisions.
 
 ## Model scope
 
@@ -52,11 +58,12 @@ See [model provenance and review notes](docs/MODEL_PROVENANCE.md), the [runtime 
 ```sh
 bun test
 bun run typecheck
+bun run format:check
 bun run verify:model
 bun run build
 ```
 
-The state tests cover hierarchy partitioning, visibility recovery, reset, and picking policy. Model verification independently checks the GLB checksum, anatomy IDs, unique source-element ownership, finite coordinates, topology, and patient laterality. [Verification notes](docs/VERIFICATION.md) record browser interaction checks and remaining limitations.
+The state tests cover hierarchy partitioning, visibility recovery, reset, and picking policy. The adapter tests cover the tree-to-scene mapping, its validation, and visibility conversion. Model verification independently checks the GLB checksum, anatomy IDs, unique source-element ownership, finite coordinates, topology, and patient laterality. [Verification notes](docs/VERIFICATION.md) record browser interaction checks and remaining limitations.
 
 The app shows loading progress and retry controls for unavailable models, unavailable WebGL, and interrupted graphics contexts. Anatomy text remains accessible when rendering fails. If the bundled GLB is missing or altered, restore it from the repository or rebuild it:
 
@@ -73,6 +80,6 @@ Application code: [MIT](LICENSE).
 
 Model and rendered model images: **BodyParts3D / Anatomography, © The Database Center for Life Science (DBCLS)**, adapted by OrganUI, under [CC BY-SA 2.1 Japan](https://creativecommons.org/licenses/by-sa/2.1/jp/deed.en). This follows the original 4.3 download service's license notice. The separate archive's CC BY 4.0 notice is not applied to these assets. See [model attribution](public/models/LICENSE.txt).
 
-Manrope and DM Sans are self-hosted under SIL OFL 1.1; Lucide icons use ISC. Notices are in [public/licenses](public/licenses/).
+Manrope and DM Sans are self-hosted under SIL OFL 1.1; Lucide icons use ISC. The anatomy tree is from the OrganUI registry; it uses Base UI and Tailwind CSS (both MIT). Notices are in [public/licenses](public/licenses/).
 
 Part of [OrganUI](https://github.com/organui), alongside [Heart](https://github.com/organui/heart-3d) and [Liver](https://github.com/organui/liver-3d).

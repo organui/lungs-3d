@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 @font-face {
   font-family: "Manrope Variable";
   font-style: normal;
@@ -22,85 +24,150 @@
   font-synthesis: none;
   font-weight: 400;
   --ink: #303630;
-  --muted: #73796f;
+  --muted-ink: #73796f;
   --line: #e1e3dc;
   --surface: #f5f5f0;
   --wash: #eceee7;
   --green: #303630;
+  /* shadcn tokens for registry components, tuned to the warm neutral palette. */
+  --background: #f5f5f0;
+  --foreground: #303630;
+  --card: #fbfbf8;
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --primary: #303630;
+  --primary-foreground: #f5f5f0;
+  --secondary: #eceee7;
+  --secondary-foreground: var(--foreground);
+  --muted: #eceee7;
+  --muted-foreground: #73796f;
+  --accent: #e7ebe1;
+  --accent-foreground: var(--foreground);
+  --destructive: #b5473a;
+  --border: #e1e3dc;
+  --input: var(--border);
+  --ring: #73796f;
+  --radius: 0.625rem;
 }
-* {
-  box-sizing: border-box;
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --font-sans: "DM Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --radius-sm: calc(var(--radius) * 0.75);
+  --radius-md: calc(var(--radius) * 0.875);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.5);
 }
-[hidden] {
-  display: none !important;
-}
-body {
-  margin: 0;
-}
-button,
-input,
-a {
-  -webkit-tap-highlight-color: transparent;
-}
-button,
-input {
-  font: inherit;
-}
-button,
-a {
-  touch-action: manipulation;
-}
-button {
-  cursor: pointer;
-  color: inherit;
-  background: none;
-  border: none;
-}
-a {
-  color: inherit;
-  text-decoration: none;
-}
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-summary:focus-visible,
-.canvas-wrap:focus-visible,
-.anatomy-panel:focus-visible {
-  outline: 2px solid #73796f;
-  outline-offset: 4px;
-}
-button:not(:disabled),
-a,
-input {
-  transition:
-    background 0.16s,
-    color 0.16s,
-    opacity 0.16s;
-}
-button:not(:disabled):hover {
-  background: #e9ebe4;
-}
-button svg,
-a svg {
-  flex-shrink: 0;
-}
-h1,
-h2,
-h3,
-p {
-  margin: 0;
-}
-h1,
-h2,
-h3 {
-  font-family: "Manrope Variable", sans-serif;
-}
-button svg {
-  vertical-align: middle;
+
+/* Base resets stay in the base layer (after Tailwind preflight) so registry
+   utility classes still win; app component styles below stay unlayered. */
+@layer base {
+  /* Undo the preflight defaults this app's styles were written against. */
+  html,
+  :host {
+    line-height: normal;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-size: revert;
+    font-weight: revert;
+  }
+  svg {
+    display: inline;
+    vertical-align: baseline;
+  }
+  legend {
+    padding: revert;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  [hidden] {
+    display: none !important;
+  }
+  body {
+    margin: 0;
+  }
+  button,
+  input,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button,
+  input {
+    font: inherit;
+  }
+  button,
+  a {
+    touch-action: manipulation;
+  }
+  button {
+    cursor: pointer;
+    color: inherit;
+    background: none;
+    border: none;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  summary:focus-visible,
+  .canvas-wrap:focus-visible,
+  .anatomy-panel:focus-visible {
+    outline: 2px solid #73796f;
+    outline-offset: 4px;
+  }
+  button:not(:disabled),
+  a,
+  input {
+    transition:
+      background 0.16s,
+      color 0.16s,
+      opacity 0.16s;
+  }
+  button:not(:disabled):hover {
+    background: #e9ebe4;
+  }
+  button svg,
+  a svg {
+    flex-shrink: 0;
+  }
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: "Manrope Variable", sans-serif;
+  }
+  button svg {
+    vertical-align: middle;
+  }
+  * {
+    border-color: var(--border);
+  }
 }
 .sr-only {
   position: absolute !important;
@@ -177,7 +244,7 @@ button svg {
   font-weight: 500;
 }
 .about-button {
-  color: var(--muted);
+  color: var(--muted-ink);
 }
 .sidebar-toggle {
   display: inline-flex;
@@ -210,7 +277,7 @@ button svg {
   font-size: 10px;
   font-weight: 650;
   letter-spacing: 1.3px;
-  color: var(--muted);
+  color: var(--muted-ink);
   display: flex;
   align-items: center;
   gap: 7px;
@@ -243,7 +310,7 @@ button svg {
   transform: translateX(-50%);
   white-space: nowrap;
   font-size: 11px;
-  color: var(--muted);
+  color: var(--muted-ink);
   pointer-events: none;
   opacity: 0.7;
   transition: opacity 0.24s;
@@ -260,7 +327,7 @@ button svg {
   align-items: center;
   gap: 7px;
   font-size: 11px;
-  color: var(--muted);
+  color: var(--muted-ink);
 }
 .scene-status button {
   text-decoration: underline;
@@ -303,7 +370,7 @@ button svg {
   white-space: nowrap;
 }
 .view-trigger svg {
-  color: var(--muted);
+  color: var(--muted-ink);
   transition: transform 0.16s;
 }
 .view-trigger[aria-expanded="true"] svg {
@@ -333,7 +400,7 @@ button svg {
   border-radius: 10px;
   font-size: 12px;
   text-align: left;
-  color: var(--muted);
+  color: var(--muted-ink);
 }
 .view-menu button[aria-checked="true"] {
   color: var(--ink);
@@ -347,7 +414,7 @@ button svg {
   display: flex;
   align-items: center;
   gap: 4px;
-  color: var(--muted);
+  color: var(--muted-ink);
 }
 .icon-button {
   width: 38px;
@@ -402,7 +469,7 @@ button svg {
 .scene-message {
   font-size: 12px;
   line-height: 1.8;
-  color: var(--muted);
+  color: var(--muted-ink);
 }
 .scene-message h2 {
   font-size: 21px;
@@ -434,41 +501,7 @@ button svg {
 }
 .count-tag {
   font-size: 10px;
-  color: var(--muted);
-}
-.search-wrap {
-  display: flex;
-  align-items: center;
-  border-radius: 12px;
-  background: var(--wash);
-  color: var(--muted);
-  padding: 0 14px;
-  gap: 10px;
-  min-height: 44px;
-}
-.search-wrap:focus-within {
-  outline: 2px solid #747970;
-  outline-offset: 1px;
-}
-.search-wrap input {
-  background: none;
-  outline: none !important;
-  border: 0;
-  width: 100%;
-  min-width: 0;
-  font-size: 12px;
-  color: var(--ink);
-  padding: 11px 0;
-}
-.search-wrap input::placeholder {
-  color: var(--muted);
-}
-.search-wrap button {
-  padding: 4px;
-  border-radius: 3px;
-}
-.search-wrap input::-webkit-search-cancel-button {
-  display: none;
+  color: var(--muted-ink);
 }
 .detail-card {
   padding: 10px 2px 0;
@@ -483,21 +516,21 @@ button svg {
 .detail-card > p {
   font-size: 12px;
   line-height: 1.8;
-  color: var(--muted);
+  color: var(--muted-ink);
 }
 .detail-card .small-note {
   display: block;
   margin-top: 13px;
   font-size: 11px;
   line-height: 1.7;
-  color: var(--muted);
+  color: var(--muted-ink);
 }
 .detail-eyebrow {
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 10px;
-  color: var(--muted);
+  color: var(--muted-ink);
   margin-bottom: 8px;
 }
 .detail-eyebrow .eyebrow {
@@ -536,7 +569,7 @@ button svg {
 }
 .model-note {
   font-size: 11px;
-  color: var(--muted);
+  color: var(--muted-ink);
   line-height: 1.7;
 }
 .model-note summary {
@@ -567,12 +600,12 @@ button svg {
   height: 36px;
   display: grid;
   place-items: center;
-  color: var(--muted);
+  color: var(--muted-ink);
 }
 .tour-card .eyebrow {
   font-size: 9px;
   letter-spacing: 1.05px;
-  color: var(--muted);
+  color: var(--muted-ink);
 }
 .tour-card h3 {
   font-size: 12px;
@@ -580,7 +613,7 @@ button svg {
 }
 .tour-card p {
   font-size: 11px;
-  color: var(--muted);
+  color: var(--muted-ink);
   margin-top: 5px;
   line-height: 1.8;
 }
@@ -606,7 +639,7 @@ button svg {
 }
 .tour-active p {
   font-size: 11px;
-  color: var(--muted);
+  color: var(--muted-ink);
 }
 .tour-top {
   display: flex;
@@ -643,7 +676,7 @@ button svg {
   align-items: center;
   gap: 6px;
   font-size: 10px;
-  color: var(--muted);
+  color: var(--muted-ink);
   line-height: 1.7;
 }
 .review-note .status-dot {
@@ -658,7 +691,7 @@ button svg {
   justify-content: space-between;
   padding: 10px 28px;
   font-size: 10px;
-  color: var(--muted);
+  color: var(--muted-ink);
   gap: 15px;
   background: var(--surface);
 }
@@ -683,8 +716,7 @@ button svg {
   overflow-y: auto;
   outline-offset: -5px !important;
 }
-.anatomy-panel,
-.structure-list {
+.anatomy-panel {
   scrollbar-width: thin;
   scrollbar-color: #ccd1c5 transparent;
 }
@@ -694,76 +726,11 @@ button svg {
   gap: 10px;
 }
 .panel-heading,
-.search-wrap,
 .detail-card,
 .display-controls,
 .review-note,
 .tour-card {
   flex-shrink: 0;
-}
-.structure-list {
-  flex: 0 1 auto;
-  min-height: 120px;
-  overflow-y: auto;
-  padding-right: 3px;
-}
-.structure-list ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.anatomy-row {
-  display: flex;
-  align-items: center;
-  padding-left: calc(var(--depth) * 12px);
-  border-radius: 10px;
-}
-.anatomy-row:hover,
-.anatomy-row:focus-within {
-  background: var(--wash);
-}
-.anatomy-row.selected {
-  background: #e7ebe1;
-}
-.anatomy-row.selected .anatomy-select {
-  font-weight: 600;
-}
-.anatomy-row.is-hidden {
-  color: var(--muted);
-}
-.anatomy-row.is-hidden .color-dot {
-  background: #b3b7af;
-}
-.expand,
-.tree-indent {
-  width: 24px;
-  min-width: 24px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border-radius: 8px;
-}
-.expand {
-  color: var(--muted);
-  padding: 0;
-}
-.anatomy-select {
-  display: flex;
-  gap: 9px;
-  align-items: center;
-  min-width: 0;
-  flex: 1;
-  padding: 10px 8px 10px 3px;
-  min-height: 40px;
-  font-size: 12px;
-  text-align: left;
-  border-radius: 10px;
-}
-.anatomy-select:not(:disabled):hover {
-  background: transparent;
-}
-.anatomy-select > span:nth-child(2) {
-  flex: 1;
 }
 .color-dot {
   display: inline-block;
@@ -773,57 +740,76 @@ button svg {
   background: var(--structure-color);
   flex-shrink: 0;
 }
-.all-lungs {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-height: 40px;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 12px;
-  text-align: left;
-  margin-bottom: 8px;
+/* Registry anatomy tree (src/components/ui/anatomy-tree.tsx, unmodified):
+   panel-specific spacing and the app's type scale. */
+.tree-scroll {
+  flex: 0 1 auto;
+  min-height: 340px;
+  overflow-y: auto;
+  padding-right: 3px;
+  scrollbar-width: thin;
+  scrollbar-color: #ccd1c5 transparent;
 }
-.all-lungs .count-tag {
-  margin-left: auto;
+.registry-tree {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
 }
-.all-lungs[aria-pressed="true"] {
-  background: #e7ebe1;
-}
-.structure-list .airway-tree {
-  margin-top: 14px;
-}
-.search-results button {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px;
-  text-align: left;
-  font-size: 12px;
-  border-radius: 10px;
-  min-height: 44px;
-}
-.search-results button[aria-pressed="true"] {
-  background: #e7ebe1;
-}
-.search-results small {
-  display: block;
-  color: var(--muted);
-  font-size: 10px;
-  margin-top: 3px;
-}
-.search-count {
-  color: var(--muted);
+.registry-tree label {
+  color: var(--muted-ink);
   font-size: 11px;
-  padding: 0 10px 8px;
+  font-weight: 500;
 }
-.no-results {
+.registry-tree input {
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--wash);
+  padding-inline: 14px;
   font-size: 12px;
-  color: var(--muted);
-  line-height: 1.8;
-  padding: 24px 10px;
+  color: var(--ink);
+}
+.registry-tree input + p {
+  font-size: 10px;
+}
+.registry-tree [role="treeitem"] {
+  min-height: 40px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+.registry-tree [role="treeitem"] button:not(:disabled):hover {
+  background: transparent;
+}
+.registry-tree [role="treeitem"] > button:first-child:not(:disabled):hover {
+  background: var(--accent);
+}
+.registry-tree [role="treeitem"] > span:first-child,
+.registry-tree [role="treeitem"] > button:first-child {
+  width: 28px;
+  height: 32px;
+  color: var(--muted-ink);
+  font-size: 14px;
+}
+.registry-tree [role="treeitem"] > button:first-child:disabled {
+  opacity: 0.35;
+}
+.registry-tree [role="treeitem"] button:last-child {
+  min-width: 58px;
+  border-color: var(--line);
+  border-radius: 99px;
+  color: var(--muted-ink);
+  font-size: 10px;
+  text-align: center;
+}
+.registry-tree [role="treeitem"][aria-checked="false"] > button:nth-child(2) {
+  color: var(--muted-ink);
+}
+.registry-tree [role="treeitem"][aria-checked="false"] button:last-child {
+  border-style: dashed;
+}
+.registry-tree [role="treeitem"][aria-checked="mixed"] button:last-child {
+  color: var(--ink);
 }
 .breadcrumbs {
   display: flex;
@@ -831,7 +817,7 @@ button svg {
   flex-wrap: wrap;
   gap: 2px;
   font-size: 11px;
-  color: var(--muted);
+  color: var(--muted-ink);
   margin-bottom: 9px;
 }
 .breadcrumbs:empty {
@@ -850,7 +836,7 @@ button svg {
 .description {
   font-size: 12px;
   line-height: 1.8;
-  color: var(--muted);
+  color: var(--muted-ink);
 }
 .display-controls > summary {
   cursor: pointer;
@@ -880,7 +866,7 @@ button svg {
   font-size: 11px;
 }
 .reveal output {
-  color: var(--muted);
+  color: var(--muted-ink);
   font-variant-numeric: tabular-nums;
 }
 .reveal input {
@@ -895,7 +881,7 @@ button svg {
   display: flex;
   justify-content: space-between;
   font-size: 10px;
-  color: var(--muted);
+  color: var(--muted-ink);
 }
 .reveal fieldset {
   padding: 0;
@@ -906,7 +892,7 @@ button svg {
 .reveal legend {
   font-size: 10px;
   margin-bottom: 8px;
-  color: var(--muted);
+  color: var(--muted-ink);
 }
 .segmented {
   display: flex;
@@ -929,7 +915,7 @@ button svg {
 }
 .pick-help {
   font-size: 11px;
-  color: var(--muted);
+  color: var(--muted-ink);
   line-height: 1.7;
   margin-top: 9px;
 }
@@ -1002,7 +988,7 @@ button svg {
 .about p {
   font-size: 12px;
   line-height: 1.9;
-  color: var(--muted);
+  color: var(--muted-ink);
   margin-bottom: 12px;
 }
 .about p a {
@@ -1127,24 +1113,14 @@ button svg {
     width: 40px;
     height: 40px;
   }
-  .search-wrap input {
-    font-size: 13px;
-  }
-  .structure-list {
+  .tree-scroll {
     overflow: visible;
     flex: none;
   }
-  .anatomy-select {
+  .registry-tree input {
     font-size: 13px;
-    min-height: 44px;
   }
-  .expand,
-  .tree-indent {
-    width: 30px;
-    min-width: 30px;
-    height: 44px;
-  }
-  .all-lungs {
+  .registry-tree [role="treeitem"] {
     min-height: 44px;
     font-size: 13px;
   }
