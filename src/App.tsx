@@ -31,7 +31,6 @@ import { ancestors, byId, leafIds, leaves } from "./anatomy";
 import {
   anatomyTree,
   defaultExpandedIds,
-  expansionFor,
   hiddenFromVisibility,
   visibilityFromHidden,
 } from "./anatomy-adapter";
@@ -68,10 +67,10 @@ const tour = [
 ];
 export default function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  // The registry tree owns search and disclosure. A new key remounts it:
-  // reset clears both, and a selection without a visible row reopens its
-  // ancestors so list and scene stay synchronized.
-  const [tree, setTree] = useState({ key: 0, expanded: defaultExpandedIds });
+  // The registry tree owns search and disclosure, and reveals a selection
+  // made elsewhere (3D pick, tour) by itself. Reset bumps its key to clear
+  // both back to the default disclosure.
+  const [treeKey, setTreeKey] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [tourStep, setTourStep] = useState<number | null>(null);
   const [about, setAbout] = useState(false);
@@ -85,22 +84,12 @@ export default function App() {
   const stage = useRef<HTMLDivElement>(null);
   const panelToggle = useRef<HTMLButtonElement>(null);
   const aboutTrigger = useRef<HTMLElement | null>(null);
-  const treeWrap = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
     if (!sidebarOpen) return;
     panel.current?.focus({ preventScroll: true });
     if (window.matchMedia("(max-width: 760px)").matches)
       panel.current?.scrollIntoView({ block: "start" });
   }, [sidebarOpen]);
-  useLayoutEffect(() => {
-    const rows = treeWrap.current;
-    if (!rows || rows.querySelector('[role="treeitem"][aria-selected="true"]'))
-      return;
-    setTree((t) => ({
-      key: t.key + 1,
-      expanded: [...new Set([...t.expanded, ...expansionFor(state.selected)])],
-    }));
-  }, [state.selected, tree.key]);
   const selected = byId[state.selected];
   const visibleCount = leaves.filter(
     (n) => !state.hidden.includes(n.id),
@@ -138,7 +127,7 @@ export default function App() {
     dispatch({ type: "reset" });
     setTourStep(null);
     setFreeOrbit(false);
-    setTree((t) => ({ key: t.key + 1, expanded: defaultExpandedIds }));
+    setTreeKey((key) => key + 1);
   }
   function step(index: number) {
     setTourStep(index);
@@ -402,9 +391,9 @@ export default function App() {
                 <X size={17} />
               </button>
             </div>
-            <div className="tree-scroll" ref={treeWrap}>
+            <div className="tree-scroll">
               <AnatomyTree
-                key={tree.key}
+                key={treeKey}
                 data={anatomyTree}
                 selectedId={state.selected}
                 onSelectionChange={select}
@@ -415,7 +404,7 @@ export default function App() {
                     hidden: hiddenFromVisibility(next),
                   })
                 }
-                defaultExpandedIds={tree.expanded}
+                defaultExpandedIds={defaultExpandedIds}
                 label="Lung anatomy"
                 className="registry-tree"
               />

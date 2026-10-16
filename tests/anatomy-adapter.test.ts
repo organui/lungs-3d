@@ -2,13 +2,16 @@ import { describe, expect, test } from "bun:test";
 import {
   anatomyTree,
   assertAnatomyMapping,
-  expansionFor,
   hiddenFromVisibility,
   normalizeVisibility,
   sceneIdsForNode,
   visibilityFromHidden,
 } from "../src/anatomy-adapter";
-import { leafIds, leaves } from "../src/anatomy";
+import { byId, leafIds, leaves } from "../src/anatomy";
+import {
+  anatomyIndex,
+  type AnatomyNode as TreeNode,
+} from "../src/components/ui/anatomy-tree";
 import { initialState, reducer } from "../src/state";
 
 describe("anatomy-to-scene adapter", () => {
@@ -67,9 +70,18 @@ describe("anatomy-to-scene adapter", () => {
     expect(reducer(s, { type: "restore" }).hidden).toEqual([]);
   });
 
-  test("discloses the ancestors of a selection", () => {
-    expect(expansionFor("FMA7338")).toEqual(["lungs", "FMA7309", "FMA7333"]);
-    expect(expansionFor("FMA26661")).toEqual(["airways"]);
-    expect(expansionFor("lungs")).toEqual([]);
+  test("leaf rows carry their scene mesh colour; parents stay selectable", () => {
+    const { nodes } = anatomyIndex(anatomyTree);
+    const rows: TreeNode[] = [...nodes.values()];
+    const leafRows = rows.filter((n) => !n.children?.length);
+    expect(leafRows).toHaveLength(leaves.length);
+    for (const row of leafRows) {
+      expect(row.color).toMatch(/^#[0-9a-f]{6}$/i);
+      expect(row.color).toBe(byId[row.id].color);
+    }
+    for (const row of rows) {
+      expect(row.selectable).toBeUndefined();
+      if (row.children?.length) expect(row.color).toBeUndefined();
+    }
   });
 });

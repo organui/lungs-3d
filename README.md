@@ -41,7 +41,7 @@ Keyboard: focus the model and use arrow keys to rotate, `+`/`−` to zoom, and `
 
 ### Anatomy tree
 
-The panel's tree is the OrganUI registry component `anatomy-tree`, installed with the shadcn CLI into `src/components/ui/anatomy-tree.tsx` and kept unmodified. Lung-specific mapping lives in `src/anatomy-adapter.ts`. See [registry integration](docs/REGISTRY_INTEGRATION.md) for the install command, checksums, and decisions.
+The panel's tree is the OrganUI registry component `anatomy-tree`, installed with the shadcn CLI into `src/components/ui/anatomy-tree.tsx` and kept unmodified. Each leaf row shows a swatch in its 3D color, and a selection made in the scene or the tour opens its branch and scrolls its row into view. Lung-specific mapping lives in `src/anatomy-adapter.ts`. See [registry integration](docs/REGISTRY_INTEGRATION.md) for the install command, checksums, and decisions.
 
 ## Model scope
 

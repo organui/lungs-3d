@@ -5,6 +5,13 @@ export type AnatomyNode = {
   id: string
   label: string
   children?: readonly AnatomyNode[]
+  /** A CSS color shown as a decorative swatch before the label. */
+  color?: string
+  /**
+   * Defaults to true. A row that is not selectable expands or collapses
+   * instead, for groupings that have no single structure to select.
+   */
+  selectable?: boolean
 }
 export type AnatomyTreeProps = {
   data: readonly AnatomyNode[]
@@ -158,11 +165,35 @@ export function AnatomyTree({
   const helpId = React.useId()
   const searchId = React.useId()
   const searching = deferredQuery.trim() !== ""
+  const groupsExpand = React.useMemo(
+    () => [...index.nodes.values()].some((node) => node.selectable === false),
+    [index]
+  )
   const rows = React.useMemo(
     () => anatomyRows(data, index, expanded, deferredQuery),
     [data, index, expanded, deferredQuery]
   )
   const focusId = focusTarget(rows, activePath, index.parents)
+  // Reveal a selection made outside the tree, such as in a 3D view: when its
+  // row is not shown, expand its ancestors, then scroll the row into view.
+  const [reveal, setReveal] = React.useState({ id: selectedId, scroll: false })
+  if (reveal.id !== selectedId) {
+    const known = !!selectedId && index.nodes.has(selectedId)
+    const shown = rows.some(({ node }) => node.id === selectedId)
+    setReveal({ id: selectedId, scroll: known })
+    const ancestors: string[] = []
+    let parent = known && !shown ? index.parents.get(selectedId!) : undefined
+    while (parent) {
+      ancestors.push(parent)
+      parent = index.parents.get(parent)
+    }
+    if (ancestors.some((id) => !expanded.has(id)))
+      setExpanded(new Set([...expanded, ...ancestors]))
+  }
+  React.useEffect(() => {
+    if (reveal.scroll && reveal.id)
+      refs.current.get(reveal.id)?.scrollIntoView?.({ block: "nearest" })
+  }, [reveal])
   React.useLayoutEffect(() => {
     // Recover only when an update removed the focused element. Focus that
     // left the tree on purpose, even to the body, is never taken back.
@@ -187,6 +218,10 @@ export function AnatomyTree({
       return next
     })
   }
+  function activate(node: AnatomyNode) {
+    if (node.selectable !== false) onSelectionChange(node.id)
+    else if (node.children?.length && !searching) toggleExpanded(node.id)
+  }
   function toggleVisibility(node: AnatomyNode) {
     onVisibilityChange(nextVisibility(node, index, visibility))
   }
@@ -206,7 +241,9 @@ export function AnatomyTree({
         className="mb-3 w-full rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-ring"
       />
       <p id={helpId} className="mb-3 text-xs text-muted-foreground">
-        Arrows navigate and expand. Enter selects. Space toggles visibility.
+        {groupsExpand
+          ? "Arrows navigate and expand. Enter selects, or expands a group. Space toggles visibility."
+          : "Arrows navigate and expand. Enter selects. Space toggles visibility."}
       </p>
       <div
         role="tree"
@@ -249,7 +286,9 @@ export function AnatomyTree({
               aria-setsize={size}
               aria-posinset={position}
               aria-expanded={branch ? open : undefined}
-              aria-selected={selectedId === node.id}
+              aria-selected={
+                node.selectable === false ? undefined : selectedId === node.id
+              }
               aria-checked={checked}
               tabIndex={focusId === node.id ? 0 : -1}
               onFocus={() => {
@@ -290,7 +329,7 @@ export function AnatomyTree({
                   if (branch && open && !searching) toggleExpanded(node.id)
                   else focus(index.parents.get(node.id))
                 }
-                if (event.key === "Enter") onSelectionChange(node.id)
+                if (event.key === "Enter") activate(node)
                 if (event.key === " ") toggleVisibility(node)
               }}
               className="my-1 flex min-h-10 items-center gap-1 rounded-md px-2 text-sm outline-offset-2 hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring aria-selected:bg-accent aria-selected:font-semibold"
@@ -316,11 +355,18 @@ export function AnatomyTree({
                 tabIndex={-1}
                 onClick={() => {
                   focus(node.id)
-                  onSelectionChange(node.id)
+                  activate(node)
                 }}
-                className="min-w-0 flex-1 py-2 text-start break-words"
+                className="flex min-w-0 flex-1 items-center gap-2 py-2 text-start break-words"
               >
-                {node.label}
+                {node.color && (
+                  <span
+                    aria-hidden="true"
+                    className="size-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: node.color }}
+                  />
+                )}
+                <span className="min-w-0">{node.label}</span>
               </Button>
               <Button
                 tabIndex={-1}

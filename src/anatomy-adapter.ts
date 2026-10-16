@@ -3,21 +3,23 @@ import {
   leafIds as treeLeafIds,
   type AnatomyNode as TreeNode,
 } from "@/components/ui/anatomy-tree";
-import { ancestors, byId, children, leaves, type AnatomyNode } from "./anatomy";
+import { byId, children, leaves, type AnatomyNode } from "./anatomy";
 
 // The explorer's panel shows two parts: the lung anatomy (both lungs → lung →
 // lobe → source-defined segment tissue) and the airway tree (trachea and the
 // two bronchial trees). Both map onto the registry tree as two roots that
 // reuse the application's own structure IDs, so the tree's controlled
 // selection is the app's selected ID with no translation. Every parent row is
-// an existing, selectable app structure; no extra `group-*` rows are needed.
+// an existing, selectable app structure; no extra `group-*` rows are needed,
+// so no row sets `selectable: false`. Each leaf row carries the colour its
+// scene mesh is drawn in as the tree's decorative swatch.
 export const treeRoots = ["lungs", "airways"] as const;
 
 function toTreeNode(node: AnatomyNode): TreeNode {
   const kids = children(node.id);
   return kids.length
     ? { id: node.id, label: node.short, children: kids.map(toTreeNode) }
-    : { id: node.id, label: node.short };
+    : { id: node.id, label: node.short, color: node.color };
 }
 
 export const anatomyTree: TreeNode[] = treeRoots.map((id) =>
@@ -38,11 +40,6 @@ export function sceneIdsForNode(id: string | null): string[] {
   const node = treeNodes.get(id);
   if (!node) return [];
   return treeLeafIds(node).filter((leaf) => sceneLeafSet.has(leaf));
-}
-
-/** Branch rows that must be open for `id` to have a visible tree row. */
-export function expansionFor(id: string): string[] {
-  return treeNodes.has(id) ? ancestors(id).map(({ id }) => id) : [];
 }
 
 /** The tree's contract: a leaf-ID map in which a missing entry is visible. */
