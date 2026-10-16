@@ -13,6 +13,8 @@ Verified on 22 September 2026 with Bun 1.4.2 and the Codex in-app Chromium brows
 
 ## Browser checks
 
+The hierarchy and search rows below describe the original hand-built anatomy list. It was replaced by the registry anatomy tree on 16 October 2026; see the [registry tree pass](#registry-anatomy-tree-pass-16-october-2026).
+
 The final interface follows the updated Heart example: full-height warm neutral stage, collapsed anatomy panel, minimal view/zoom/reveal/reset toolbar, model information dialog, and small attribution footer.
 
 | Area                 | Observed result                                                                                                                                                                                    |
@@ -51,3 +53,47 @@ Model screenshots are adaptations of BodyParts3D / Anatomography, © DBCLS, unde
 ## Cross-explorer consistency pass (10 October 2026)
 
 Selection, framing and the anatomy panel now behave the same in all five OrganUI explorers (brain, heart, kidneys, liver, lungs), using the heart explorer as the reference. A selection lifts the chosen structure in its own color and ghosts the rest to 22% opacity, toned toward the canvas. Every named view is framed by `src/framing.ts`, which fits sampled surface points to the view at a shared 80% fill. The panel starts closed, opens from the header Anatomy button with focus moved into it, and Escape closes it and returns focus to that button. Checked in headless Chromium (SwiftShader WebGL) at 1440×900 and 390×844, with typecheck, tests and build passing.
+
+## Registry anatomy tree pass (16 October 2026)
+
+The panel's hand-built list and its search box were replaced by the OrganUI registry `anatomy-tree` component, installed with the shadcn CLI and kept unmodified. See [REGISTRY_INTEGRATION.md](REGISTRY_INTEGRATION.md).
+
+Automated: `bun install --frozen-lockfile` from a removed `node_modules`, `bun run typecheck`, `bun test` (12 tests: the earlier state tests plus adapter mapping, validation and visibility conversion), `bun run build`, and `bun run format:check` passed.
+
+Browser checks used Playwright with headless Chromium (SwiftShader WebGL) at 1440×900 and 390×844 against the dev server, with no console errors in either run:
+
+| Area            | Observed result                                                                                                                                                                                    |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Panel           | Closed by default; the header Anatomy button opened it and moved focus into it; Escape from a tree row closed it and returned focus to the button.                                                 |
+| Search          | “lingular” showed Superior and Inferior lingular with their ancestors (Both lungs › Left lung › Upper lobe).                                                                                       |
+| Tree selection  | Selecting Superior lingular from the tree updated the selection chip, details card and tree row; the view label stayed “Anterior”.                                                                 |
+| Visibility      | Hiding the right apical segment gave 19 of 20 groups and “Mixed” on its lobe and on Both lungs. Hiding Left lung gave 11 of 20. The mixed Both lungs row showed all lung groups again.             |
+| Restore / reset | Hiding the airway tree then Restore all set every row back to Visible. Reset cleared a typed tree search and returned to the default disclosure with Both lungs selected.                          |
+| 3D → tree       | A scene click (lobe mode, collapsed tree) selected Right upper lobe without changing the view label; the chip name opened the panel and the tree showed the Upper lobe row selected and disclosed. |
+| Hidden picking  | After hiding Right lung from the tree, clicking the same screen point did not select right-lung tissue.                                                                                            |
+| Tour            | All four stops kept the tree selection in step (Both lungs, Upper lobe, Apical, Airway tree); Finish restored the initial state.                                                                   |
+| Mobile          | 390-pixel document width with no horizontal overflow; the tree stacks in the panel below the scene.                                                                                                |
+
+Before installing the component, the existing interface was screenshotted with and without the Tailwind import; header, toolbar, chip, detail card, display controls, tour and dialog matched (no pixel differed by more than 16 of 255 per channel) after the preflight adjustments described in the integration notes. Screen-reader output was not tested; the tree's roles and keyboard behavior come from the registry component and were only exercised through Playwright.
+
+## Registry tree update: colors and built-in reveal (16 October 2026)
+
+The tree was reinstalled from OrganUI #12 (`b8e6451`, served locally) and the panel adopted its new node options; see [REGISTRY_INTEGRATION.md](REGISTRY_INTEGRATION.md). Leaf rows carry their mesh color; all rows stay selectable (no `group-*` rows); the app's remount-to-reveal workaround was removed in favor of the component's built-in reveal.
+
+Automated: `bun install --frozen-lockfile` from a removed `node_modules`, `bun run typecheck`, `bun test` (12 tests; the ancestor-disclosure test was replaced by one asserting each leaf row's color equals its scene color and no row is made unselectable), `bun run build`, and `bun run format:check` passed.
+
+Browser checks used Playwright with headless Chromium (SwiftShader WebGL) at 1440×900 and 390×844 against the production build (`vite preview`), with no console errors in either run:
+
+| Area            | Observed result                                                                                                                                                                                                                                                                                                                                       |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Colors          | With every branch open, all 20 leaf rows showed a 10-pixel swatch whose computed color equaled the mesh color of that structure, in tree order; parent rows had none.                                                                                                                                                                                 |
+| Parent rows     | Clicking the Right lung label, or Enter on Left lung, selected it (chip and `aria-selected`); ArrowRight expanded it. The view label stayed "Anterior".                                                                                                                                                                                               |
+| 3D → tree       | With Both lungs collapsed, a scene click selected Right middle lobe; the tree opened Both lungs › Right lung and showed Middle lobe selected and in view. On desktop, with the tree scrolled to the bottom and Right lung collapsed, a segment-mode click selected Right anterior segment; the tree opened its branch and scrolled the row into view. |
+| Tour            | Starting with Both lungs collapsed, the four stops selected Both lungs, Upper lobe, Apical and Airway tree in the tree.                                                                                                                                                                                                                               |
+| Search          | "lingular" showed both lingular groups with their ancestors; selecting Inferior lingular updated chip and row. A scene pick during a search keeps the search; clearing it showed the picked row selected and disclosed.                                                                                                                               |
+| Visibility      | Hiding Apical gave "Mixed" on Upper lobe, Right lung and Both lungs and 19 of 20 groups; hiding Left lung gave 11 of 20; "Mixed: show Both lungs" made every row Visible again.                                                                                                                                                                       |
+| Reset           | Cleared a typed search and returned to the default disclosure with Both lungs selected.                                                                                                                                                                                                                                                               |
+| Panel and focus | Closed by default; opening moved focus into it; Escape from a tree row closed it and returned focus to the Anatomy button; the chip name reopened it with the picked row selected.                                                                                                                                                                    |
+| Mobile          | Document width 390 pixels with no horizontal overflow.                                                                                                                                                                                                                                                                                                |
+
+Screenshots: [anatomy.png](screenshots/anatomy.png) (desktop) and [mobile-anatomy.png](screenshots/mobile-anatomy.png), both with Right upper lobe selected and its segment rows showing their swatches.
