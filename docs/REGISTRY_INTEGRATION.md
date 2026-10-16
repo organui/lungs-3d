@@ -7,10 +7,10 @@ The Anatomy panel uses the OrganUI registry item `anatomy-tree`. The installed s
 Reinstalled on 16 October 2026 with the shadcn CLI:
 
 ```sh
-REGISTRY_URL=http://127.0.0.1:4411 bunx shadcn@4.21.0 add http://127.0.0.1:4411/anatomy-tree.json -y -o
+REGISTRY_URL=http://127.0.0.1:4412 bunx shadcn@4.21.0 add http://127.0.0.1:4412/anatomy-tree.json -y -o
 ```
 
-This install is the item from OrganUI pull request #12 (branch commit `d6b36d0`), which adds the optional `color` and `selectable` node fields and built-in reveal of the selected row. #12 was not merged at install time. The build sandbox's network policy blocks `organui.com` and `ui.shadcn.com`, so the public URL (`https://organui.com/r/anatomy-tree.json`) could not be used: a local static server on `127.0.0.1:4411` served the registry artifact built from that commit, plus shadcn's `colors/neutral.json` fetched from the shadcn GitHub repository, and `REGISTRY_URL` pointed the CLI's own registry lookups at it. **After #12 merges, re-verify against `https://organui.com/r/anatomy-tree.json`**: reinstalling from it should produce the same file (same checksum below) if the published item matches `d6b36d0`.
+This install is the item from OrganUI pull request #12 (branch commit `b8e6451`), which adds the optional `color` and `selectable` node fields and built-in reveal of the selected row. #12 was not merged at install time. The build sandbox's network policy blocks `organui.com` and `ui.shadcn.com`, so the public URL (`https://organui.com/r/anatomy-tree.json`) could not be used: a local static server on `127.0.0.1:4412` served the registry artifact built from that commit, plus shadcn's `colors/neutral.json` fetched from the shadcn GitHub repository, and `REGISTRY_URL` pointed the CLI's own registry lookups at it. **After #12 merges, re-verify against `https://organui.com/r/anatomy-tree.json`**: reinstalling from it should produce the same file (same checksum below) if the published item matches `b8e6451`.
 
 The first install (same day, OrganUI `master` commit `5e20c41`, served JSON `f519cf85…`, installed file `39b29446…`) predated these options.
 
@@ -18,9 +18,9 @@ Provenance at install time:
 
 | Artifact                                     | SHA-256                                                            |
 | -------------------------------------------- | ------------------------------------------------------------------ |
-| Served `anatomy-tree.json`                   | `32fbc477ece5f02ac135dbf0a5b4c059c37fc2ca9abc8982641b55c080cc9b30` |
-| Embedded source (`files[0].content`)         | `cb0ebd637b64a9813ba1139560315024b315580ad04e5df6eca3b3d1bb4844c0` |
-| Tracked `src/components/ui/anatomy-tree.tsx` | `dc14798adfbdcaef505cbe05e2ca92a6a3aae6164465d06e8d4d99cd415efab2` |
+| Served `anatomy-tree.json`                   | `719c1547afb1453e809ee1b2fca0dc99858083aa3ff712477a493c77e8f5f389` |
+| Embedded source (`files[0].content`)         | `14709d69270066ebb4677e736d71fa59c2ec9cf9c1f0e1a6a8236795633944cd` |
+| Tracked `src/components/ui/anatomy-tree.tsx` | `3d5554cdc179f1ad778fd6321cc1414c293c4cca0535efd9aab679c686893538` |
 
 The item declares `@base-ui/react@^1.8.0`. The CLI rewrote the existing exact pin to that range in `package.json`; it was set back to exactly `1.8.0` like the other dependencies, and `bun install` left the text `bun.lock` unchanged. The project uses React 19.2.8, TypeScript 7.0.2, Vite 8.3.0, Tailwind CSS 4.1.18 (`tailwindcss` + `@tailwindcss/vite`) and shadcn's Base UI consumer shape (`components.json`).
 
@@ -97,4 +97,4 @@ No registry defect blocked the integration and the component was not forked. Obs
 4. Search matches labels only; there is no hook for aliases such as source IDs.
 5. Built-in reveal does not clear a search that excludes the newly selected row, so the row stays filtered out until the search is cleared.
 
-Resolved by OrganUI #12 (`d6b36d0`): revealing a selection made outside the tree (formerly a remount workaround) and per-row decoration (formerly no colour dots in the list).
+Resolved by OrganUI #12 (`b8e6451`): revealing a selection made outside the tree (formerly a remount workaround) and per-row decoration (formerly no colour dots in the list).

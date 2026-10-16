@@ -78,7 +78,7 @@ Before installing the component, the existing interface was screenshotted with a
 
 ## Registry tree update: colors and built-in reveal (16 October 2026)
 
-The tree was reinstalled from OrganUI #12 (`d6b36d0`, served locally) and the panel adopted its new node options; see [REGISTRY_INTEGRATION.md](REGISTRY_INTEGRATION.md). Leaf rows carry their mesh color; all rows stay selectable (no `group-*` rows); the app's remount-to-reveal workaround was removed in favor of the component's built-in reveal.
+The tree was reinstalled from OrganUI #12 (`b8e6451`, served locally) and the panel adopted its new node options; see [REGISTRY_INTEGRATION.md](REGISTRY_INTEGRATION.md). Leaf rows carry their mesh color; all rows stay selectable (no `group-*` rows); the app's remount-to-reveal workaround was removed in favor of the component's built-in reveal.
 
 Automated: `bun install --frozen-lockfile` from a removed `node_modules`, `bun run typecheck`, `bun test` (12 tests; the ancestor-disclosure test was replaced by one asserting each leaf row's color equals its scene color and no row is made unselectable), `bun run build`, and `bun run format:check` passed.
 

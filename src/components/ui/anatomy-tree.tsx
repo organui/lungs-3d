@@ -139,6 +139,33 @@ export function focusTarget(
   return id ?? activePath.find((path) => ids.has(path)) ?? rows[0]?.node.id
 }
 
+/**
+ * Brings a row into view inside its nearest scrolling container only. Unlike
+ * scrollIntoView, the page itself never moves, so a pick in a viewer does not
+ * jump a phone layout to the tree.
+ */
+function scrollWithinContainer(row: HTMLElement) {
+  let container = row.parentElement
+  while (container) {
+    const { overflowY } = getComputedStyle(container)
+    if (
+      /auto|scroll/.test(overflowY) &&
+      container.scrollHeight > container.clientHeight
+    )
+      break
+    container = container.parentElement
+  }
+  if (!container) return
+  const bounds = container.getBoundingClientRect()
+  const target = row.getBoundingClientRect()
+  if (target.top < bounds.top) container.scrollTop -= bounds.top - target.top
+  else if (target.bottom > bounds.bottom)
+    container.scrollTop += Math.min(
+      target.bottom - bounds.bottom,
+      target.top - bounds.top
+    )
+}
+
 export function AnatomyTree({
   data,
   selectedId,
@@ -191,8 +218,8 @@ export function AnatomyTree({
       setExpanded(new Set([...expanded, ...ancestors]))
   }
   React.useEffect(() => {
-    if (reveal.scroll && reveal.id)
-      refs.current.get(reveal.id)?.scrollIntoView?.({ block: "nearest" })
+    const row = reveal.scroll && reveal.id && refs.current.get(reveal.id)
+    if (row) scrollWithinContainer(row)
   }, [reveal])
   React.useLayoutEffect(() => {
     // Recover only when an update removed the focused element. Focus that
